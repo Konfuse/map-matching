@@ -3,9 +3,7 @@ package com.konfuse.mapmatching.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.konfuse.mapmatching.domain.Bound;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +18,10 @@ public class Partitions {
     public static final double LAT_2 = 34.3662;
 
     public static void main(String[] args) {
-        String path = "dataAll.txt";
+        String path = "/home/konfuse/Desktop/dataAll.txt";
+        String pathMorning = "morning.txt";
+        String pathNoon = "noon.txt";
+        String pathNight = "night.txt";
         BufferedReader reader;
         String line;
         String[] items;
@@ -29,12 +30,12 @@ public class Partitions {
         int count = 4;
         Bound bound = new Bound(LON_1, LON_2, LAT_1, LAT_2);
         Map<String, Bound> boundMap = getPartitions(count);
-        Map<String, Double> morningSum = new HashMap<>();
-        Map<String, Long> morningNum = new HashMap<>();
-        Map<String, Double> noonSum = new HashMap<>();
-        Map<String, Long> noonNum = new HashMap<>();
-        Map<String, Double> nightSum = new HashMap<>();
-        Map<String, Long> nightNum = new HashMap<>();
+        Map<String, Double> sumMorning = new HashMap<>();
+        Map<String, Long> numMorning = new HashMap<>();
+        Map<String, Double> sumNoon = new HashMap<>();
+        Map<String, Long> numNoon = new HashMap<>();
+        Map<String, Double> sumNight = new HashMap<>();
+        Map<String, Long> numNight = new HashMap<>();
         double stepLon = (LON_2 - LON_1) / count;
         double stepLat = (LAT_2 - LAT_1) / count;
         String index, time;
@@ -49,34 +50,35 @@ public class Partitions {
                 if (! bound.contains(lng, lat))
                     continue;
                 index = (int)((lng - LON_1) / stepLon) + "-" + (int)((lat - LAT_1) / stepLat);
+//                System.out.println(index + ":" + speed);
 
                 if (time.compareTo("08") <= 0) {
                     double finalSpeed = speed;
-                    morningSum.compute(index, (k, v) -> {
+                    sumMorning.compute(index, (k, v) -> {
                         if (v == null) return finalSpeed;
                         return v + finalSpeed;
                     });
-                    morningNum.compute(index, (k, v) -> {
+                    numMorning.compute(index, (k, v) -> {
                         if (v == null) return 1L;
                         return v + 1;
                     });
                 } else if (time.compareTo("16") <= 0) {
                     double finalSpeed = speed;
-                    noonSum.compute(index, (k, v) -> {
+                    sumNoon.compute(index, (k, v) -> {
                         if (v == null) return finalSpeed;
                         return v + finalSpeed;
                     });
-                    noonNum.compute(index, (k, v) -> {
+                    numNoon.compute(index, (k, v) -> {
                         if (v == null) return 1L;
                         return v + 1;
                     });
                 } else {
                     double finalSpeed = speed;
-                    nightSum.compute(index, (k, v) -> {
+                    sumNight.compute(index, (k, v) -> {
                         if (v == null) return finalSpeed;
                         return v + finalSpeed;
                     });
-                    nightNum.compute(index, (k, v) -> {
+                    numNight.compute(index, (k, v) -> {
                         if (v == null) return 1L;
                         return v + 1;
                     });
@@ -86,13 +88,37 @@ public class Partitions {
             e.printStackTrace();
         }
 
-        JSONObject morningJson = new JSONObject();
-        JSONObject noonJson = new JSONObject();
-        JSONObject nightJson = new JSONObject();
-        JSONObject properties = new JSONObject();
-        JSONObject geometry = new JSONObject();
-        for (String key : boundMap.keySet()) {
-
+        BufferedWriter writerMorning = null;
+        BufferedWriter writerNoon = null;
+        BufferedWriter writerNight = null;
+        try {
+            writerMorning = new BufferedWriter(new FileWriter(pathMorning));
+            writerNoon = new BufferedWriter(new FileWriter(pathNoon));
+            writerNight = new BufferedWriter(new FileWriter(pathNight));
+            for (String key : boundMap.keySet()) {
+                if (sumMorning.containsKey(key)) {
+                    writerMorning.write(boundMap.get(key).mbr() + ":" + sumMorning.get(key) / numMorning.get(key));
+                    writerMorning.newLine();
+                }
+                if (sumNoon.containsKey(key)) {
+                    writerNoon.write(boundMap.get(key).mbr() + ":" + sumNoon.get(key) / numNoon.get(key));
+                    writerNoon.newLine();
+                }
+                if (sumNight.containsKey(key)) {
+                    writerNight.write(boundMap.get(key).mbr() + ":" + sumNight.get(key) / numNight.get(key));
+                    writerNight.newLine();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                writerMorning.close();
+                writerNoon.close();
+                writerNight.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

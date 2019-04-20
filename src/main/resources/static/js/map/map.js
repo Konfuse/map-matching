@@ -13,16 +13,29 @@ L.tileLayer( 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 $.ajax({
     type: "GET",
-    url: "/circle",
+    url: "/geo",
     data: {},
     success: function (data) {
         var poi = JSON.parse(data);
-        var circle = L.circle([poi.lat, poi.lng], 500, {
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0.5
+        // console.log("SUCCESS : ", data);
+        L.geoJson(poi, {
+            style: function(feature) {
+                var color;
+                switch (feature.properties.speed) {
+                    case 'red':  color = "#f08080"; break;
+                    case 'yellow':    color = "#f0e68c"; break;
+                    case 'green':    color = "#98fb98";
+                }
+                return {
+                    fillColor: color,
+                    weight: 2,
+                    opacity: 1,
+                    color: 'white',
+                    dashArray: '3',
+                    fillOpacity: 0.7
+                };
+            }
         }).addTo(map);
-        console.log("SUCCESS : ", data);
             }
 });
 

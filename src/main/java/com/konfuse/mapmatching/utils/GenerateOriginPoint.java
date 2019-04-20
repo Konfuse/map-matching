@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class GenerateOriginPoint {
     public static void main(String[] args) {
-        String pathRead = "C:/Users/Konfuse/Desktop/2011-06-19.txt";
+        String pathRead = "/home/konfuse/Desktop/2011-06-19.txt";
         String pathWrite = "dataAll.txt";
 
         String line;

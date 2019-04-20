@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.Set;
  * @Date: 2019/4/18 10:16
  */
 @RestController
-public class MapPointController {
+public class DrawController {
     @RequestMapping("/points")
     public Iterable<MapPoint> list() {
         Set<MapPoint> mapPoints = new HashSet<>();
@@ -46,11 +47,17 @@ public class MapPointController {
         return mapPoints;
     }
 
-    @RequestMapping("/circle")
+    @RequestMapping("/geo")
     public String myList() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("lat", 34.2617);
-        jsonObject.put("lng", 108.9427);
-        return jsonObject.toJSONString();
+        String path = "geo.json";
+        BufferedReader reader;
+        String json = null;
+        try {
+            reader = new BufferedReader(new FileReader(path));
+            json = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return json;
     }
 }
