@@ -1,5 +1,8 @@
 HELP.md
 /target/
+*.txt
+*.json
+*.csv
 !.mvn/wrapper/maven-wrapper.jar
 
 ### STS ###

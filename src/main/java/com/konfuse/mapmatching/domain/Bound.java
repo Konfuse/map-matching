@@ -108,12 +108,7 @@ public class Bound {
                 new ArrayList<Double>(){{
             add(x1);
             add(y1);
-        }},
-                new ArrayList<Double>(){{
-                    add(x1);
-                    add(y1);
-                }}
-        ));
+        }}));
         List<List<List<Double>>> polygons = new ArrayList<List<List<Double>>>(){{
             add(polygon);
         }};
@@ -125,6 +120,6 @@ public class Bound {
     }
 
     public String center() {
-        return Arrays.toString(new double[]{(x1 + x2) / 2, (y1 + y2) / 2});
+        return (x1 + x2) / 2 + "," + (y1 + y2) / 2;
     }
 }

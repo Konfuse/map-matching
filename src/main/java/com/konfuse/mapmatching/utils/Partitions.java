@@ -38,6 +38,7 @@ public class Partitions {
         Map<String, Long> numNight = new HashMap<>();
         double stepLon = (LON_2 - LON_1) / count;
         double stepLat = (LAT_2 - LAT_1) / count;
+        System.out.println(stepLon + "," + stepLat);
         String index, time;
         try {
             reader = new BufferedReader(new FileReader(path));
@@ -95,18 +96,24 @@ public class Partitions {
             writerMorning = new BufferedWriter(new FileWriter(pathMorning));
             writerNoon = new BufferedWriter(new FileWriter(pathNoon));
             writerNight = new BufferedWriter(new FileWriter(pathNight));
+            writerMorning.write("LON,LAT,SPEED");
+            writerNoon.write("LON,LAT,SPEED");
+            writerNight.write("LON,LAT,SPEED");
             for (String key : boundMap.keySet()) {
                 if (sumMorning.containsKey(key)) {
-                    writerMorning.write(boundMap.get(key).mbr() + ":" + sumMorning.get(key) / numMorning.get(key));
                     writerMorning.newLine();
+                    writerMorning.write(boundMap.get(key).center() + "," + sumMorning.get(key) / numMorning.get(key));
+//                    writerMorning.write(boundMap.get(key).mbr() + ":" + sumMorning.get(key) / numMorning.get(key));
                 }
                 if (sumNoon.containsKey(key)) {
-                    writerNoon.write(boundMap.get(key).mbr() + ":" + sumNoon.get(key) / numNoon.get(key));
                     writerNoon.newLine();
+                    writerNoon.write(boundMap.get(key).center() + "," + sumNoon.get(key) / numNoon.get(key));
+//                    writerNoon.write(boundMap.get(key).mbr() + ":" + sumNoon.get(key) / numNoon.get(key));
                 }
                 if (sumNight.containsKey(key)) {
-                    writerNight.write(boundMap.get(key).mbr() + ":" + sumNight.get(key) / numNight.get(key));
                     writerNight.newLine();
+                    writerNight.write(boundMap.get(key).mbr() + ":" + sumNight.get(key) / numNight.get(key));
+//                    writerNight.write(boundMap.get(key).mbr() + ":" + sumNight.get(key) / numNight.get(key));
                 }
             }
         } catch (IOException e) {
