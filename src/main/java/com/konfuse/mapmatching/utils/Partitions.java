@@ -18,115 +18,37 @@ public class Partitions {
     public static final double LAT_2 = 34.3662;
 
     public static void main(String[] args) {
-        String path = "/home/konfuse/Desktop/dataAll.txt";
-        String pathMorning = "morning.txt";
-        String pathNoon = "noon.txt";
-        String pathNight = "night.txt";
-        BufferedReader reader;
-        String line;
-        String[] items;
-        double lat, lng, speed;
+        String[] inputPath = {
+                "/home/konfuse/Desktop/data/OriginData/dataMorning.txt",
+                "/home/konfuse/Desktop/data/OriginData/dataNoon.txt",
+                "/home/konfuse/Desktop/data/OriginData/dataAfternoon.txt",
+                "/home/konfuse/Desktop/data/OriginData/dataEvening.txt",
+                "/home/konfuse/Desktop/data/OriginData/dataNight.txt"
+        };
+        String[] outputPath = {
+                "/home/konfuse/Desktop/data/PartitionCSV/morning.csv",
+                "/home/konfuse/Desktop/data/PartitionCSV/noon.csv",
+                "/home/konfuse/Desktop/data/PartitionCSV/afternoon.csv",
+                "/home/konfuse/Desktop/data/PartitionCSV/evening.csv",
+                "/home/konfuse/Desktop/data/PartitionCSV/night.csv"
+        };
 
-        int count = 4;
-        Bound bound = new Bound(LON_1, LON_2, LAT_1, LAT_2);
-        Map<String, Bound> boundMap = getPartitions(count);
-        Map<String, Double> sumMorning = new HashMap<>();
-        Map<String, Long> numMorning = new HashMap<>();
-        Map<String, Double> sumNoon = new HashMap<>();
-        Map<String, Long> numNoon = new HashMap<>();
-        Map<String, Double> sumNight = new HashMap<>();
-        Map<String, Long> numNight = new HashMap<>();
+        if (inputPath.length != outputPath.length) {
+            System.out.println("wrong path config...");
+            return;
+        }
+
+        int count = 100;
         double stepLon = (LON_2 - LON_1) / count;
         double stepLat = (LAT_2 - LAT_1) / count;
-        System.out.println(stepLon + "," + stepLat);
-        String index, time;
-        try {
-            reader = new BufferedReader(new FileReader(path));
-            while ((line = reader.readLine()) != null) {
-                items = line.split(",");
-                time = items[1].split(":")[0];
-                lng = Double.parseDouble(items[2]);
-                lat = Double.parseDouble(items[3]);
-                speed = Double.parseDouble(items[4]);
-                if (! bound.contains(lng, lat))
-                    continue;
-                index = (int)((lng - LON_1) / stepLon) + "-" + (int)((lat - LAT_1) / stepLat);
-//                System.out.println(index + ":" + speed);
 
-                if (time.compareTo("08") <= 0) {
-                    double finalSpeed = speed;
-                    sumMorning.compute(index, (k, v) -> {
-                        if (v == null) return finalSpeed;
-                        return v + finalSpeed;
-                    });
-                    numMorning.compute(index, (k, v) -> {
-                        if (v == null) return 1L;
-                        return v + 1;
-                    });
-                } else if (time.compareTo("16") <= 0) {
-                    double finalSpeed = speed;
-                    sumNoon.compute(index, (k, v) -> {
-                        if (v == null) return finalSpeed;
-                        return v + finalSpeed;
-                    });
-                    numNoon.compute(index, (k, v) -> {
-                        if (v == null) return 1L;
-                        return v + 1;
-                    });
-                } else {
-                    double finalSpeed = speed;
-                    sumNight.compute(index, (k, v) -> {
-                        if (v == null) return finalSpeed;
-                        return v + finalSpeed;
-                    });
-                    numNight.compute(index, (k, v) -> {
-                        if (v == null) return 1L;
-                        return v + 1;
-                    });
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        Map<String, Bound> boundMap = getPartitions(count);
+        for (int i = 0; i < inputPath.length; i++) {
+            System.out.println("process %" + inputPath[i].split("/")[6] + " file...");
+            dataPartition(count, boundMap, inputPath[i], outputPath[i]);
         }
 
-        BufferedWriter writerMorning = null;
-        BufferedWriter writerNoon = null;
-        BufferedWriter writerNight = null;
-        try {
-            writerMorning = new BufferedWriter(new FileWriter(pathMorning));
-            writerNoon = new BufferedWriter(new FileWriter(pathNoon));
-            writerNight = new BufferedWriter(new FileWriter(pathNight));
-            writerMorning.write("LON,LAT,SPEED");
-            writerNoon.write("LON,LAT,SPEED");
-            writerNight.write("LON,LAT,SPEED");
-            for (String key : boundMap.keySet()) {
-                if (sumMorning.containsKey(key)) {
-                    writerMorning.newLine();
-                    writerMorning.write(boundMap.get(key).center() + "," + sumMorning.get(key) / numMorning.get(key));
-//                    writerMorning.write(boundMap.get(key).mbr() + ":" + sumMorning.get(key) / numMorning.get(key));
-                }
-                if (sumNoon.containsKey(key)) {
-                    writerNoon.newLine();
-                    writerNoon.write(boundMap.get(key).center() + "," + sumNoon.get(key) / numNoon.get(key));
-//                    writerNoon.write(boundMap.get(key).mbr() + ":" + sumNoon.get(key) / numNoon.get(key));
-                }
-                if (sumNight.containsKey(key)) {
-                    writerNight.newLine();
-                    writerNight.write(boundMap.get(key).mbr() + ":" + sumNight.get(key) / numNight.get(key));
-//                    writerNight.write(boundMap.get(key).mbr() + ":" + sumNight.get(key) / numNight.get(key));
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                writerMorning.close();
-                writerNoon.close();
-                writerNight.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        System.out.println("Lon step: " + stepLon + ", Lon step: " + stepLat);
     }
 
     public static Map<String, Bound> getPartitions(int count) {
@@ -146,5 +68,64 @@ public class Partitions {
         }
 
         return boundMap;
+    }
+
+    public static void dataPartition(int count, Map<String, Bound> boundMap, String dataPath, String outPath) {
+        BufferedReader reader;
+        String line, index;
+        String[] items;
+        double lat, lng, speed;
+        long total = 0L;
+
+        Map<String, Double> sum = new HashMap<>();
+        Map<String, Long> num = new HashMap<>();
+
+        double stepLon = (LON_2 - LON_1) / count;
+        double stepLat = (LAT_2 - LAT_1) / count;
+        int indexLon, indexLat;
+        try {
+            reader = new BufferedReader(new FileReader(dataPath));
+            while ((line = reader.readLine()) != null) {
+                items = line.split(",");
+                lng = Double.parseDouble(items[0]);
+                lat = Double.parseDouble(items[1]);
+                speed = Double.parseDouble(items[2]);
+                indexLon = (int)((lng - LON_1) / stepLon) == count ? (int)((lng - LON_1) / stepLon) - 1 : (int)((lng - LON_1) / stepLon);
+                indexLat = (int)((lat - LAT_1) / stepLat) == count ? (int)((lat - LAT_1) / stepLat) - 1 : (int)((lat - LAT_1) / stepLat);
+                index = indexLon + "-" + indexLat;
+//                System.out.println(index + ":" + speed);
+                double finalSpeed = speed;
+                sum.compute(index, (k, v) -> {
+                    if (v == null) return finalSpeed;
+                    return v + finalSpeed;
+                });
+                num.compute(index, (k, v) -> {
+                    if (v == null) return 1L;
+                    return v + 1;
+                });
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(outPath));
+            writer.write("LON,LAT,SPEED");
+            for (String key : sum.keySet()) {
+                total++;
+                writer.newLine();
+                writer.write(boundMap.get(key).center() + "," + sum.get(key) / num.get(key));
+            }
+            System.out.println(total + " partitions built.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
