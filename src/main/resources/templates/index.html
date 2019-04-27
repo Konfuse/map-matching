@@ -24,53 +24,73 @@
     <script type='text/javascript' src='../js/leaflet-layerjson.min.js'></script>
     <!-- -->
 
+    <style type="text/css">
+        .col-md-2 {
+            margin-top: 150px;
+        }
+        .form-inline {
+            margin-top: 10px;
+            margin-bottom: 30px;
+            margin-left: 30px;
+        }
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+        .info h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
+    </style>
 </head>
 <body>
 
 <nav class="navbar navbar-default">
     <div class="container-fluid">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-5" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
             <a class="navbar-brand" href="#"></a>
         </div>
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-5">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="#">区域查询</a></li>
-                <li><a href="#">车辆轨迹查询</a></li>
+                <li class="active"><a href="#">交通车况</a></li>
             </ul>
-            <p class="navbar-text navbar-right">The End</p>
+            <p class="navbar-text navbar-right">孔维健</p>
         </div>
     </div>
 </nav>
 
-<div class="container">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2">
+            <form id="form">
+                <div class="form-inline">
+                    <label>时段选择</label>
+                    <select class="form-control" id="timestamp" name="timestamp" style="width:200px">
+                        <option selected="selected" value="morning">早高峰</option>
+                        <option value="noon">午高峰</option>
+                        <option value="afternoon">下午段</option>
+                        <option value="evening">晚高峰</option>
+                        <option value="night">夜间段</option>
+                    </select>
+                </div>
 
-    <article>
-        <header>
-            <h3>西安</h3>
-            <p></p>
-        </header>
-        <section>
+                <div class="form-inline">
+                    <button class="btn btn-default text-center" onclick="updateMap()" style="width: 183px" type="button">
+                        查询
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-10" id="container">
             <div id="map" style="height: 680px; border: 1px solid #AAA;"></div>
             <div id="loader"></div>
-            <p>4.19日展示.</p>
-        </section>
-        <footer>
-
-        </footer>
-        <hr/>
-    </article>
-
-    <footer style="text-align: center">
-        <p><span style="text-decoration:none;color:grey;">/* MapApp - <a style="text-decoration:none;color:grey;" href="https://github.com"><span class="glyphicon glyphicon-star"></span>  孔维健</a> */</span>
-        </p>
-    </footer>
-
+        </div>
+    </div>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -78,6 +98,5 @@
 <!-- Our JS map script importing-->
 <script type='text/javascript' src='../js/map/map.js'></script>
 <script type='text/javascript' src='../js/map/markers.js'></script>
-
 </body>
 </html>

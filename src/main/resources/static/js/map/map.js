@@ -11,31 +11,19 @@ L.tileLayer( 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     subdomains: ['a','b','c']
 }).addTo( map );
 
-$.ajax({
-    type: "GET",
-    url: "/geo",
-    data: {},
-    success: function (data) {
-        var poi = JSON.parse(data);
-        // console.log("SUCCESS : ", data);
-        L.geoJson(poi, {
-            style: function(feature) {
-                var color;
-                switch (feature.properties.speed) {
-                    case 'red':  color = "#f08080"; break;
-                    case 'yellow':    color = "#f0e68c"; break;
-                    case 'green':    color = "#98fb98";
-                }
-                return {
-                    fillColor: color,
-                    weight: 2,
-                    opacity: 1,
-                    color: 'white',
-                    dashArray: '3',
-                    fillOpacity: 0.7
-                };
-            }
-        }).addTo(map);
-            }
-});
+var info = L.control();
+info.onAdd = function(map) {
+    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+    this.update();
+    return this._div;
+};
+// method that we will use to update the control based on feature properties passed
+info.update = function (props) {
+    this._div.innerHTML = '<h4>Traffic Speed</h4>' +  (props ?
+        '<b>' + props.status + '</b><br />' + props.speed + ' km / h'
+        : 'Over Xian');
+};
+info.addTo(map);
 
+layerGroup = L.layerGroup();
+layerGroup.addTo(map);

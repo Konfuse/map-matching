@@ -3,8 +3,10 @@ package com.konfuse.mapmatching.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.konfuse.mapmatching.domain.MapPoint;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -47,9 +49,11 @@ public class DrawController {
         return mapPoints;
     }
 
+    @ResponseBody
     @RequestMapping("/geo")
-    public String myList() {
-        String path = "geo.json";
+    public String myList(HttpServletRequest request) {
+        String absPath = "GeoJsons/";
+        String path = absPath + request.getParameter("timestamp") + ".json";
         BufferedReader reader;
         String json = null;
         try {

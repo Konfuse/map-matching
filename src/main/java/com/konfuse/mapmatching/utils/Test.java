@@ -3,31 +3,69 @@ package com.konfuse.mapmatching.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.konfuse.mapmatching.domain.Bound;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.*;
-
-import static com.konfuse.mapmatching.utils.Partitions.getPartitions;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @Author: Konfuse
  * @Date: 2019/4/18 11:51
  */
 public class Test {
-    public static final double LON_1 = 108.7811;
-    public static final double LAT_1 = 34.1868;
-    public static final double LON_2 = 109.0907;
-    public static final double LAT_2 = 34.3662;
-
     public static void main(String[] args) {
-        String[] dividePath = {
-                "/home/konfuse/Desktop/data/OriginData/dataMorning.txt",
-                "/home/konfuse/Desktop/data/OriginData/dataNoon.txt",
-                "/home/konfuse/Desktop/data/OriginData/dataAfternoon.txt",
-                "/home/konfuse/Desktop/data/OriginData/dataEvening.txt",
-                "/home/konfuse/Desktop/data/OriginData/dataNight.txt"
-        };
+        String path = "morning.txt";
+        String pathWrite = "geo.json";
+        BufferedReader reader;
+        BufferedWriter writer = null;
+        JSONObject geoJson;
+        JSONObject properties;
+        JSONObject geometry;
+        Bound bound;
+        String line, coordinates;
+        List<JSONObject> list = new ArrayList<>();
+        double speed;
+        try {
+            reader = new BufferedReader(new FileReader(path));
+            while ((line = reader.readLine()) != null) {
+                geoJson = new JSONObject();
+                properties = new JSONObject();
+                geometry = new JSONObject();
+
+                coordinates = line.split(":")[0];
+                bound = new Bound(
+                        Double.parseDouble(coordinates.split(",")[0]),
+                        Double.parseDouble(coordinates.split(",")[2]),
+                        Double.parseDouble(coordinates.split(",")[1]),
+                        Double.parseDouble(coordinates.split(",")[3])
+                );
+                geometry.put("type", "Polygon");
+                geometry.put("coordinates", bound.coordinates());
+
+                speed = Double.parseDouble(line.split(":")[1]);
+                if (speed <= 20) properties.put("speed", "red");
+                else if (speed <= 40) properties.put("speed", "yellow");
+                else properties.put("speed", "green");
+
+                geoJson.put("type", "Feature");
+                geoJson.put("properties", properties);
+                geoJson.put("geometry", geometry);
+                list.add(geoJson);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            writer = new BufferedWriter(new FileWriter(pathWrite));
+            writer.write(list.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
